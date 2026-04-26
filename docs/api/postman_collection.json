@@ -1,0 +1,292 @@
+{
+	"info": {
+		"_postman_id": "8e3a2b1c-d4e5-4f6g-7h8i-9j0k1l2m3n4o",
+		"name": "JMC Employee Management System - Full API",
+		"description": "Dokumentasi Lengkap API EMS JMC Indonesia - Junior Programmer Test.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "1. Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set(\"access_token\", jsonData.data.access_token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"identifier\": \"superadmin\",\n    \"password\": \"Admin@123\",\n    \"remember_me\": true\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "login"]
+						}
+					}
+				},
+				{
+					"name": "2. Get Profile (Me)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/auth/me",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "me"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Dashboard",
+			"item": [
+				{
+					"name": "Manager Dashboard Data",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/dashboard/manager",
+							"host": ["{{base_url}}"],
+							"path": ["api", "dashboard", "manager"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Pegawai",
+			"item": [
+				{
+					"name": "List Pegawai (Filter & Search)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/pegawai?search=&jabatan=Staf&limit=10&page=1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "pegawai"],
+							"query": [
+								{ "key": "search", "value": "" },
+								{ "key": "jabatan", "value": "Staf" },
+								{ "key": "limit", "value": "10" },
+								{ "key": "page", "value": "1" }
+							]
+						}
+					}
+				},
+				{
+					"name": "Autocomplete Pegawai",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/pegawai/autocomplete?q=ma",
+							"host": ["{{base_url}}"],
+							"path": ["api", "pegawai", "autocomplete"],
+							"query": [{ "key": "q", "value": "ma" }]
+						}
+					}
+				},
+				{
+					"name": "Create Pegawai",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{ "key": "nip", "value": "20260001", "type": "text" },
+								{ "key": "nama", "value": "Ahmad Dani", "type": "text" },
+								{ "key": "email", "value": "dani@jmc.co.id", "type": "text" },
+								{ "key": "no_hp", "value": "+62899112233", "type": "text" },
+								{ "key": "jabatan", "value": "Staf", "type": "text" },
+								{ "key": "departemen", "value": "Production", "type": "text" },
+								{ "key": "tanggal_lahir", "value": "1995-05-20", "type": "text" },
+								{ "key": "tanggal_masuk", "value": "2024-01-10", "type": "text" }
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/pegawai",
+							"host": ["{{base_url}}"],
+							"path": ["api", "pegawai"]
+						}
+					}
+				},
+				{
+					"name": "Export PDF",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/pegawai/export/pdf",
+							"host": ["{{base_url}}"],
+							"path": ["api", "pegawai", "export", "pdf"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "List Users",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/users",
+							"host": ["{{base_url}}"],
+							"path": ["api", "users"]
+						}
+					}
+				},
+				{
+					"name": "Create User (Auto-Pass)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{ "key": "pegawai_id", "value": "1", "type": "text" },
+								{ "key": "role_id", "value": "1", "type": "text" },
+								{ "key": "username", "value": "ahmad_dani", "type": "text" },
+								{ "key": "email", "value": "dani@jmc.co.id", "type": "text" }
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users",
+							"host": ["{{base_url}}"],
+							"path": ["api", "users"]
+						}
+					}
+				},
+				{
+					"name": "Toggle Status (Force Logout)",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/users/2/status",
+							"host": ["{{base_url}}"],
+							"path": ["api", "users", "2", "status"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Tunjangan",
+			"item": [
+				{
+					"name": "Calculate Preview",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"pegawai_id\": 1,\n    \"jarak_km\": 12.5,\n    \"hari_masuk\": 22\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tunjangan/calculate",
+							"host": ["{{base_url}}"],
+							"path": ["api", "tunjangan", "calculate"]
+						}
+					}
+				},
+				{
+					"name": "Input Tunjangan",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{ "key": "pegawai_id", "value": "1", "type": "text" },
+								{ "key": "periode_bulan", "value": "4", "type": "text" },
+								{ "key": "periode_tahun", "value": "2026", "type": "text" },
+								{ "key": "jarak_km", "value": "12.5", "type": "text" },
+								{ "key": "hari_masuk", "value": "22", "type": "text" }
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tunjangan",
+							"host": ["{{base_url}}"],
+							"path": ["api", "tunjangan"]
+						}
+					}
+				},
+				{
+					"name": "Get Setting Tunjangan Aktif",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/setting-tunjangan/aktif",
+							"host": ["{{base_url}}"],
+							"path": ["api", "setting-tunjangan", "aktif"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Wilayah",
+			"item": [
+				{
+					"name": "Search Kecamatan",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/wilayah/kecamatan?q=dep",
+							"host": ["{{base_url}}"],
+							"path": ["api", "wilayah", "kecamatan"],
+							"query": [{ "key": "q", "value": "dep" }]
+						}
+					}
+				},
+				{
+					"name": "Get Kabupaten by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/wilayah/kabupaten/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "wilayah", "kabupaten", "1"]
+						}
+					}
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }]
+	},
+	"variable": [
+		{ "key": "base_url", "value": "http://localhost:8080", "type": "string" },
+		{ "key": "access_token", "value": "", "type": "string" }
+	]
+}

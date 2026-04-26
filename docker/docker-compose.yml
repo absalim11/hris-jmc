@@ -1,0 +1,51 @@
+version: '3.9'
+
+services:
+  backend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.backend
+    ports:
+      - "8080:80"
+    environment:
+      - CI_ENVIRONMENT=development
+      - database.default.hostname=db_jmc
+      - database.default.database=employee_db
+      - database.default.username=employee_user
+      - database.default.password=employee_pass
+      - JWT_SECRET=jmc_secret_key_2026_priority_mvp
+    volumes:
+      - ../backend:/var/www/html
+    depends_on:
+      - db_jmc
+
+  frontend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.frontend
+    ports:
+      - "3000:80"
+    volumes:
+      - ../frontend:/var/www/html
+
+  db_jmc:
+    image: mariadb:10.11
+    environment:
+      MYSQL_ROOT_PASSWORD: root_pass
+      MYSQL_DATABASE: employee_db
+      MYSQL_USER: employee_user
+      MYSQL_PASSWORD: employee_pass
+    ports:
+      - "33077:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  adminer:
+    image: adminer:latest
+    ports:
+      - "8081:8080"
+    depends_on:
+      - db_jmc
+
+volumes:
+  db_data:

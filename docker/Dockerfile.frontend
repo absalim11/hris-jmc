@@ -1,0 +1,5 @@
+FROM php:8.3-apache
+RUN a2enmod rewrite
+# Salin konfigurasi agar SPA berjalan dengan benar
+COPY ./docker/apache_frontend.conf /etc/apache2/sites-available/000-default.conf
+WORKDIR /var/www/html
