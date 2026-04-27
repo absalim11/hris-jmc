@@ -11,10 +11,14 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], function($routes) 
     
     // Auth
     $routes->post('auth/login', 'AuthController::login');
+    $routes->post('auth/refresh', 'AuthController::refresh');
     $routes->get('auth/me', 'AuthController::me');
     
     // Dashboard
     $routes->get('dashboard/manager', 'DashboardController::manager');
+    $routes->get('dashboard', 'DashboardController::index');
+    // RBAC matrix
+    $routes->get('rbac/matrix', 'RbacController::matrix');
 
     // ROLES
     $routes->group('roles', ['namespace' => 'App\Controllers\Api', 'filter' => 'rbac:role,read'], function($routes) {
@@ -42,6 +46,12 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], function($routes) 
         $routes->get('autocomplete', 'PegawaiController::getAutocomplete');
         $routes->get('export/pdf', 'PegawaiController::exportPdf');
         $routes->post('(:num)/foto', 'PegawaiController::uploadFoto/$1', ['filter' => 'rbac:pegawai,update']);
+
+        // Pegawai pendidikan (dynamic list)
+        $routes->get('(:num)/pendidikan', 'PegawaiPendidikanController::index/$1');
+        $routes->post('(:num)/pendidikan', 'PegawaiPendidikanController::create/$1', ['filter' => 'rbac:pegawai,create']);
+        $routes->put('pendidikan/(:num)', 'PegawaiPendidikanController::update/$1', ['filter' => 'rbac:pegawai,update']);
+        $routes->delete('pendidikan/(:num)', 'PegawaiPendidikanController::delete/$1', ['filter' => 'rbac:pegawai,delete']);
     });
 
     // TUNJANGAN
@@ -56,6 +66,12 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], function($routes) 
         $routes->get('/', 'SettingTunjanganController::index');
         $routes->post('/', 'SettingTunjanganController::create', ['filter' => 'rbac:setting_tunjangan,create']);
         $routes->get('aktif', 'SettingTunjanganController::getAktif');
+    });
+
+    // ACTIVITY LOGS
+    $routes->group('logs', ['namespace' => 'App\\Controllers\\Api', 'filter' => 'rbac:activity_log,read'], function($routes) {
+        $routes->get('/', 'ActivityLogController::index');
+        $routes->get('(:num)', 'ActivityLogController::show/$1');
     });
 
     // WILAYAH (No RBAC, just namespace)

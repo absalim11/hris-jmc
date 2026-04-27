@@ -36,7 +36,7 @@ class UserController extends BaseController
         if (!$this->validate([
             'pegawai_id' => 'required|is_unique[users.pegawai_id]',
             'role_id'    => 'required',
-            'username'   => 'required|min_length[6]|is_unique[users.username]|alpha_numeric_punct',
+            'username'   => ['label' => 'Username', 'rules' => 'required|min_length[6]|is_unique[users.username]|regex_match[/^[a-z0-9]+$/]'],
             'email'      => 'required|valid_email|is_unique[users.email]'
         ])) {
             return $this->fail($this->validator->getErrors());
@@ -44,8 +44,18 @@ class UserController extends BaseController
 
         $user = $_REQUEST['user'] ?? null;
         $data = $this->request->getPost();
-        // Simple auto-gen password for MVP
-        $plainPassword = bin2hex(random_bytes(4)) . '@123'; 
+        // Normalize username to lowercase
+        if (isset($data['username'])) $data['username'] = strtolower($data['username']);
+
+        // Generate a strong temporary password that satisfies PRD rules
+        $upper = chr(rand(65,90));
+        $lower = chr(rand(97,122));
+        $digit = chr(rand(48,57));
+        $specials = '!@#$%^&*()-_+=';
+        $special = $specials[rand(0, strlen($specials)-1)];
+        $random = substr(str_shuffle('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), 0, 4);
+        $plainPassword = $upper . $lower . $digit . $special . $random; // e.g. At least 8 chars with required categories
+
         $data['password'] = password_hash($plainPassword, PASSWORD_BCRYPT);
         $data['status'] = 1;
         $data['created_by'] = $user->id ?? null;
@@ -53,8 +63,8 @@ class UserController extends BaseController
         $this->model->insert($data);
 
         return $this->respondCreated([
-            'status' => true, 
-            'message' => 'User created', 
+            'status' => true,
+            'message' => 'User created',
             'data' => ['temp_password' => $plainPassword]
         ]);
     }

@@ -25,6 +25,7 @@ class JwtLibrary
             'iat' => $iat,
             'exp' => $exp,
             'sub' => $user['id'],
+            'typ' => 'access',
             'user' => [
                 'id' => $user['id'],
                 'username' => $user['username'],
@@ -33,6 +34,21 @@ class JwtLibrary
                 'role_nama' => $user['role_nama'],
                 'role_slug' => $user['role_slug'],
             ]
+        ];
+
+        return JWT::encode($payload, $this->key, 'HS256');
+    }
+
+    public function generateRefreshToken($user)
+    {
+        $iat = time();
+        $exp = ($iat + (30 * 24 * 3600)); // 30 days
+        $payload = [
+            'iss' => 'jmc-employee-app',
+            'iat' => $iat,
+            'exp' => $exp,
+            'sub' => $user['id'],
+            'typ' => 'refresh'
         ];
 
         return JWT::encode($payload, $this->key, 'HS256');

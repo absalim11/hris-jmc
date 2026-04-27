@@ -28,6 +28,7 @@ class Filters extends BaseConfig
         'rbac'          => \App\Filters\RbacFilter::class,
         'log'           => \App\Filters\LogFilter::class,
         'cors'          => \App\Filters\CorsFilter::class,
+        'ratelimit'     => \App\Filters\RateLimitFilter::class,
     ];
 
     /**
@@ -78,6 +79,9 @@ class Filters extends BaseConfig
      */
     public array $filters = [
         'log' => ['after' => ['api/*']],
-        'jwt' => ['before' => ['api/*', 'except' => ['api/auth/login', 'api/auth/refresh']]]
+        'ratelimit' => ['before' => ['api/*']],
+        'jwt' => ['before' => [
+            'api/*' => ['except' => ['api/auth/login', 'api/auth/refresh']],
+        ]],
     ];
 }
