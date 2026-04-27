@@ -41,22 +41,34 @@
 					}
 				},
 				{
-					"name": "2. Get Profile (Me)",
+					"name": "3. Refresh Token",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/auth/refresh",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "refresh"]
+						}
+					}
+				}
+				]
+				},
+				{
+				"name": "Dashboard",
+				"item": [
+				{
+					"name": "Admin Dashboard Data",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/api/auth/me",
+							"raw": "{{base_url}}/api/dashboard",
 							"host": ["{{base_url}}"],
-							"path": ["api", "auth", "me"]
+							"path": ["api", "dashboard"]
 						}
 					}
-				}
-			]
-		},
-		{
-			"name": "Dashboard",
-			"item": [
+				},
 				{
 					"name": "Manager Dashboard Data",
 					"request": {
@@ -69,8 +81,42 @@
 						}
 					}
 				}
-			]
-		},
+				]
+				},
+				{
+				"name": "RBAC & Logs",
+				"item": [
+				{
+					"name": "Get RBAC Matrix",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/rbac/matrix",
+							"host": ["{{base_url}}"],
+							"path": ["api", "rbac", "matrix"]
+						}
+					}
+				},
+				{
+					"name": "Get Activity Logs",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/logs?page=1&limit=20",
+							"host": ["{{base_url}}"],
+							"path": ["api", "logs"],
+							"query": [
+								{ "key": "page", "value": "1" },
+								{ "key": "limit", "value": "20" }
+							]
+						}
+					}
+				}
+				]
+				},
+
 		{
 			"name": "Pegawai",
 			"item": [

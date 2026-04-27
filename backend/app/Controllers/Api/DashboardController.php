@@ -49,7 +49,24 @@ class DashboardController extends BaseController
             ->get()
             ->getResult();
 
-        // 3. Tabular 5 newest contract (Staf)
+        // 3. Chart: Departemen Distribution
+        $departemen = $db->table('pegawai')
+            ->select('departemen, count(*) as total')
+            ->where('status', 1)
+            ->groupBy('departemen')
+            ->orderBy('total', 'DESC')
+            ->get()
+            ->getResult();
+
+        // 4. Chart: Jabatan per departemen (bar stacked data)
+        $jabatanPerDep = $db->table('pegawai')
+            ->select('departemen, jabatan, count(*) as total')
+            ->where('status', 1)
+            ->groupBy('departemen, jabatan')
+            ->get()
+            ->getResult();
+
+        // 5. Tabular 5 newest Staf
         $latest = $model->where('jabatan', 'Staf')->orderBy('tanggal_masuk', 'DESC')->limit(5)->findAll();
 
         return $this->respond([
@@ -61,8 +78,10 @@ class DashboardController extends BaseController
                     'manager' => $manager,
                     'magang' => $magang
                 ],
-                'gender_chart' => $gender,
-                'latest_staf' => $latest
+                'gender_chart'      => $gender,
+                'departemen_chart'  => $departemen,
+                'jabatan_per_dep'   => $jabatanPerDep,
+                'latest_staf'       => $latest
             ]
         ]);
     }

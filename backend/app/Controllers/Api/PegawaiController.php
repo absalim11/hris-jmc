@@ -53,6 +53,17 @@ class PegawaiController extends BaseController
         ]);
     }
 
+    public function show($id = null)
+    {
+        $pegawai = $this->model->find($id);
+        if (!$pegawai) {
+            return $this->failNotFound('Pegawai tidak ditemukan');
+        }
+        $pegawai['masa_kerja'] = $this->calculateMasaKerja($pegawai['tanggal_masuk']);
+        $pegawai['foto_url']   = $pegawai['foto'] ? base_url('uploads/foto/' . $pegawai['foto']) : null;
+        return $this->respond(['status' => true, 'data' => $pegawai]);
+    }
+
     public function create()
     {
         // ... (validation code)
@@ -61,6 +72,15 @@ class PegawaiController extends BaseController
         $data['created_by'] = $user->id ?? null;
 
         $id = $this->model->insert($data);
+
+        // Handle foto upload if included in the same multipart request
+        $file = $this->request->getFile('foto');
+        if ($file && $file->isValid() && !$file->hasMoved()) {
+            $newName = $file->getRandomName();
+            $file->move(ROOTPATH . 'public/uploads/foto', $newName);
+            $this->model->update($id, ['foto' => $newName]);
+        }
+
         return $this->respondCreated(['status' => true, 'message' => 'Pegawai created', 'id' => $id]);
     }
 
@@ -123,7 +143,7 @@ class PegawaiController extends BaseController
 
         $html = view('exports/pegawai_pdf', ['pegawai' => $data]);
 
-        $mpdf = new \Mpdf\Mpdf();
+        $mpdf = new \Mpdf\Mpdf(['tempDir' => WRITEPATH . 'mpdf']);
         $mpdf->WriteHTML($html);
         
         return $this->response->setHeader('Content-Type', 'application/pdf')

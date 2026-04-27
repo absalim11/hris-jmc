@@ -35,10 +35,11 @@ class RoleController extends BaseController
 
     public function create()
     {
-        $data = $this->request->getPost();
-        if (!$this->validate([
+        // Support both JSON (ApiService) and form-data
+        $data = $this->request->getJSON(true) ?? $this->request->getPost();
+        if (!$this->validateData($data, [
             'slug' => 'required|is_unique[roles.slug]',
-            'nama' => 'required'
+            'nama' => 'required',
         ])) {
             return $this->fail($this->validator->getErrors());
         }
@@ -49,7 +50,7 @@ class RoleController extends BaseController
 
     public function update($id = null)
     {
-        $data = $this->request->getRawInput();
+        $data = $this->request->getJSON(true) ?? $this->request->getRawInput();
         if (!$this->model->find($id)) {
             return $this->failNotFound('Role not found');
         }

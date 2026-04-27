@@ -80,8 +80,6 @@ class Filters extends BaseConfig
     public array $filters = [
         'log' => ['after' => ['api/*']],
         'ratelimit' => ['before' => ['api/*']],
-        'jwt' => ['before' => [
-            'api/*' => ['except' => ['api/auth/login', 'api/auth/refresh']],
-        ]],
+        'jwt' => ['before' => ['api/*']],
     ];
 }

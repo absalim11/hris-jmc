@@ -17,8 +17,9 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], function($routes) 
     // Dashboard
     $routes->get('dashboard/manager', 'DashboardController::manager');
     $routes->get('dashboard', 'DashboardController::index');
-    // RBAC matrix
+    // RBAC matrix + toggle
     $routes->get('rbac/matrix', 'RbacController::matrix');
+    $routes->post('rbac/toggle', 'RbacController::toggle', ['filter' => 'rbac:role,update']);
 
     // ROLES
     $routes->group('roles', ['namespace' => 'App\Controllers\Api', 'filter' => 'rbac:role,read'], function($routes) {
@@ -45,6 +46,7 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], function($routes) 
         $routes->delete('(:num)', 'PegawaiController::delete/$1', ['filter' => 'rbac:pegawai,delete']);
         $routes->get('autocomplete', 'PegawaiController::getAutocomplete');
         $routes->get('export/pdf', 'PegawaiController::exportPdf');
+        $routes->get('(:num)', 'PegawaiController::show/$1');
         $routes->post('(:num)/foto', 'PegawaiController::uploadFoto/$1', ['filter' => 'rbac:pegawai,update']);
 
         // Pegawai pendidikan (dynamic list)
@@ -71,6 +73,7 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], function($routes) 
     // ACTIVITY LOGS
     $routes->group('logs', ['namespace' => 'App\\Controllers\\Api', 'filter' => 'rbac:activity_log,read'], function($routes) {
         $routes->get('/', 'ActivityLogController::index');
+        $routes->get('stats', 'ActivityLogController::stats');
         $routes->get('(:num)', 'ActivityLogController::show/$1');
     });
 

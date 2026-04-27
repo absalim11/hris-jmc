@@ -25,7 +25,7 @@ class SettingTunjanganController extends BaseController
     public function create()
     {
         $user = $_REQUEST['user'] ?? null;
-        $data = $this->request->getPost();
+        $data = $this->request->getJSON(true) ?? $this->request->getPost();
         $data['created_by'] = $user->id ?? null;
         $this->model->insert($data);
         return $this->respondCreated(['status' => true, 'message' => 'Setting saved']);

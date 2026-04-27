@@ -12,7 +12,13 @@
 
 1. [Project Overview](#1-project-overview)
 2. [Architecture](#2-architecture)
+   - [2.1 Overview](#21-overview)
+   - [2.2 Separation of Concerns](#22-separation-of-concerns)
+   - [2.3 Communication Protocol](#23-communication-protocol)
 3. [Tech Stack](#3-tech-stack)
+   - [3.1 Backend](#31-backend)
+   - [3.2 Frontend](#32-frontend)
+   - [3.3 Development Tools](#33-development-tools)
 4. [Project Structure](#4-project-structure)
 5. [Authentication & JWT](#5-authentication--jwt)
 6. [RBAC Matrix](#6-rbac-matrix)
@@ -26,7 +32,7 @@
 14. [Module: Setting Tunjangan Transport](#14-module-setting-tunjangan-transport)
 15. [Module: Tunjangan Transport](#15-module-tunjangan-transport)
 16. [Module: Log](#16-module-log)
-17. [Frontend SPA Convention](#17-frontend-spa-convention)
+17. [Frontend Laravel Convention](#17-frontend-laravel-convention)
 18. [Docker & Environment Setup](#18-docker--environment-setup)
 19. [API Documentation](#19-api-documentation)
 20. [Testing Requirements](#20-testing-requirements)
@@ -38,7 +44,7 @@
 
 ### 1.1 Description
 
-Aplikasi web berbasis SPA (Single Page Application) untuk pengelolaan data pegawai perusahaan. Aplikasi mencakup manajemen user dan role (RBAC), data pegawai, tunjangan transport, dan audit log.
+Aplikasi web untuk pengelolaan data pegawai perusahaan yang dikembangkan menggunakan Laravel 12 sebagai frontend engine yang berinteraksi dengan REST API backend. UI menggunakan pola "Island" untuk komponen interaktif yang kompleks.
 
 ### 1.2 Key Objectives
 
@@ -61,21 +67,21 @@ Pengerjaan maksimal **72 jam (3 hari kalender)** sejak waktu start dinyatakan.
 ```
 ┌───────────────────────────────────────────────────────────┐
 │                        CLIENT BROWSER                      │
-│                                                           │
-│  ┌─────────────────────────────────────────────────────┐  │
-│  │          FRONTEND (VuQuery SPA)                     │  │
-│  │  jQuery + Vue Island Pattern                        │  │
-│  │  Static HTML/JS/CSS served via Nginx or CI4 public  │  │
-│  │  Communicates via REST API (JSON + JWT Bearer)      │  │
-│  └───────────────────────┬─────────────────────────────┘  │
-└──────────────────────────│────────────────────────────────┘
-                           │ HTTP/HTTPS (JSON)
+│            (Vue Components / jQuery for Interactivity)     │
+└──────────────────────────┬────────────────────────────────┘
+                           │ HTTP/HTTPS (HTML/JSON)
+                    ┌──────▼──────┐
+                    │   FRONTEND  │
+                    │  Laravel 12 │
+                    │ (Blade/BFF) │
+                    └──────┬──────┘
+                           │ Guzzle API Client
                            │ Authorization: Bearer <JWT>
                     ┌──────▼──────┐
                     │   BACKEND   │
                     │ CodeIgniter4│
                     │  REST API   │
-                    │ JWT Auth    │
+                    │  (JWT Auth) │
                     └──────┬──────┘
                            │
                     ┌──────▼──────┐
@@ -88,7 +94,7 @@ Pengerjaan maksimal **72 jam (3 hari kalender)** sejak waktu start dinyatakan.
 
 | Layer      | Responsibility                                                         |
 |------------|------------------------------------------------------------------------|
-| Frontend   | UI rendering, state management, API calls, JWT storage in localStorage |
+| Frontend   | UI rendering (Blade), State Management (Session), API calls (Guzzle)   |
 | Backend    | Business logic, data validation, RBAC enforcement, JWT issuance        |
 | Database   | Data persistence, referential integrity, stored procedures             |
 
@@ -96,8 +102,7 @@ Pengerjaan maksimal **72 jam (3 hari kalender)** sejak waktu start dinyatakan.
 
 - Semua komunikasi frontend ↔ backend via **JSON REST API**
 - Autentikasi menggunakan **JWT Bearer Token** di header `Authorization`
-- Token disimpan di `localStorage` pada frontend
-- Token di-refresh menggunakan refresh token endpoint
+- Token disimpan di Laravel Session pada frontend
 
 ---
 
@@ -118,14 +123,14 @@ Pengerjaan maksimal **72 jam (3 hari kalender)** sejak waktu start dinyatakan.
 
 | Komponen       | Teknologi                         | Keterangan                               |
 |----------------|-----------------------------------|------------------------------------------|
-| Core           | jQuery                            | DOM manipulation, AJAX calls             |
-| SPA Pattern    | VuQuery Island                    | https://github.com/absalim11/VuQuery-SPA |
-| CSS Framework  | Bootstrap 5 (atau Material/Foundation) | Tailwind DILARANG                   |
-| Markup         | HTML5                             |                                          |
-| Styling        | CSS3                              |                                          |
-| Charts         | Chart.js atau ApexCharts          | Untuk dashboard widget                   |
+| Core           | Laravel 12                        | Routing, Controllers, Blade Rendering    |
+| UI Pattern      | Vue Island Pattern                | Vue.js komponen di dalam Blade           |
+| CSS Framework  | Basecoat UI (Vanilla CSS)         | Disesuaikan dari legacy themes           |
+| Markup         | Blade Templates                   |                                          |
+| Styling        | Vanilla CSS                       |                                          |
+| Charts         | Chart.js                          |                                          |
 
-> **PENTING:** Frontend framework yang digunakan adalah konsep "Vue Island" dari repo [VuQuery-SPA](https://github.com/absalim11/VuQuery-SPA). Pelajari dan ikuti konvensi repo tersebut.
+> **PENTING:** Arsitektur frontend menggunakan Laravel 12 dengan pola Vue Island yang diintegrasikan ke dalam template Blade untuk interaktivitas komponen tertentu.
 
 ### 3.3 Development Tools
 
@@ -134,7 +139,7 @@ Pengerjaan maksimal **72 jam (3 hari kalender)** sejak waktu start dinyatakan.
 | Docker      | Container runtime                               |
 | Composer    | PHP dependency manager                          |
 | npm/yarn    | Frontend dependency manager                     |
-| Swagger/Redoc | API documentation                             |
+| Postman     | API documentation & Testing                     |
 | PHPUnit     | Unit testing (backend)                          |
 | Git         | Version control (repo disediakan perusahaan)    |
 
@@ -172,26 +177,24 @@ project-root/
 │   ├── .env
 │   └── composer.json
 │
-├── frontend/                   # VuQuery SPA frontend
+├── frontend/                   # Laravel 12 Frontend
+│   ├── app/
+│   │   ├── Http/
+│   │   │   ├── Controllers/
+│   │   │   └── Middleware/
+│   │   └── Services/           # ApiService (Guzzle wrapper)
+│   ├── bootstrap/
+│   ├── config/
 │   ├── public/
-│   │   ├── index.html
-│   │   ├── assets/
-│   │   │   ├── css/
-│   │   │   ├── js/
-│   │   │   └── img/
-│   │   └── pages/
-│   │       ├── login.html
-│   │       ├── dashboard.html
-│   │       ├── pegawai/
-│   │       ├── user/
-│   │       ├── role/
-│   │       ├── tunjangan/
-│   │       └── log/
-│   ├── src/
-│   │   ├── api/                # Axios/jQuery AJAX wrappers
-│   │   │   └── client.js       # Base API client with JWT header injection
-│   │   ├── islands/            # Vue Island components
-│   │   └── utils/
+│   ├── resources/
+│   │   ├── css/
+│   │   ├── js/
+│   │   │   └── components/     # Vue Islands
+│   │   └── views/              # Blade Templates
+│   ├── routes/
+│   │   └── web.php
+│   ├── .env
+│   ├── composer.json
 │   └── package.json
 │
 ├── docker/
@@ -202,8 +205,8 @@ project-root/
 │       └── init.sql
 │
 ├── docs/
-│   ├── api/                    # Swagger/OpenAPI spec
-│   │   └── openapi.yaml
+│   ├── api/                    # API spec
+│   │   └── postman_collection.json
 │   ├── PRD.md                  # This file
 │   └── TESTING.md
 │
@@ -217,13 +220,13 @@ project-root/
 ### 5.1 JWT Flow
 
 ```
-1. Client POST /api/auth/login  { identifier, password, captcha, remember_me }
-2. Server validates → issues { access_token, refresh_token, expires_in }
-3. Client menyimpan token di localStorage
-4. Setiap request menyertakan header: Authorization: Bearer <access_token>
-5. Server validasi JWT di JwtFilter sebelum controller dieksekusi
-6. Jika token expired → Client hits POST /api/auth/refresh dengan refresh_token
-7. POST /api/auth/logout → server blacklist refresh token (tambahkan ke tabel token_blacklist)
+1. Client POST /login (Laravel) -> hits /api/auth/login (Backend)
+2. Backend validates → issues { access_token, refresh_token, expires_in }
+3. Laravel menyimpan token di Session
+4. Setiap request ke backend menyertakan header: Authorization: Bearer <access_token> via ApiService (Guzzle)
+5. Backend validasi JWT di JwtFilter sebelum controller dieksekusi
+6. Jika token expired → Laravel auto-refresh menggunakan refresh token (jika diimplementasikan)
+7. Logout (Laravel) → Laravel hits POST /api/auth/logout (Backend) & flush session
 ```
 
 ### 5.2 Token Specs
@@ -233,7 +236,7 @@ project-root/
 | Algorithm       | HS256                                      |
 | Access Token TTL | 60 menit (kecuali remember_me aktif)      |
 | Refresh Token TTL | 7 hari (30 hari jika remember_me aktif) |
-| Storage         | localStorage (frontend)                    |
+| Storage         | Laravel Session (frontend)                 |
 | Header Key      | `Authorization: Bearer <token>`            |
 
 ### 5.3 JWT Payload
@@ -996,75 +999,41 @@ Log ditulis melalui **CI4 After Filter** agar tidak mencemari controller logic. 
 
 ---
 
-## 17. Frontend SPA Convention
+## 17. Frontend Laravel Convention
 
-### 17.1 VuQuery Island Pattern
+### 17.1 Laravel Vue Island Pattern
 
-Mengacu pada repo: **https://github.com/absalim11/VuQuery-SPA**
+- Setiap halaman utama di-render menggunakan **Laravel Blade**.
+- Komponen interaktif yang kompleks diimplementasikan sebagai **Vue.js Components** yang di-mount ke elemen spesifik di dalam Blade (Island Pattern).
+- Komunikasi ke Backend API utama dilakukan melalui **ApiService.php** (Server-side Guzzle) untuk pengambilan data awal.
+- Interaksi client-side (AJAX) menggunakan **Fetch API** atau **Axios** dengan menyertakan token CSRF Laravel jika diperlukan.
+- State global (JWT) dikelola oleh Laravel Session.
 
-- Setiap halaman adalah HTML file biasa
-- Komponen reaktif diinisiasi sebagai "island" menggunakan Vue.js minimal + jQuery
-- Navigasi antar halaman menggunakan hash routing atau history API (sesuai konvensi repo)
-- State global (JWT, user info, role) disimpan di `localStorage` dan dibaca ulang setiap page load
+### 17.2 Api Service (Server-side)
 
-### 17.2 API Client
+Gunakan `ApiService.php` untuk membungkus request Guzzle:
 
-Buat wrapper tunggal di `src/api/client.js`:
-
-```javascript
-// src/api/client.js
-const API_BASE = 'http://localhost:8080/api';
-
-function getToken() {
-  return localStorage.getItem('access_token');
+```php
+// app/Services/ApiService.php
+class ApiService {
+    public function request($method, $endpoint, $options = []) {
+        // Otomatis menyertakan Bearer Token dari Session
+        // Handle token expired & refresh logic
+    }
 }
-
-async function apiRequest(method, endpoint, body = null) {
-  const headers = {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-  };
-  const token = getToken();
-  if (token) headers['Authorization'] = `Bearer ${token}`;
-
-  const config = { method, headers };
-  if (body) config.body = JSON.stringify(body);
-
-  const res = await fetch(`${API_BASE}${endpoint}`, config);
-
-  if (res.status === 401) {
-    // Coba refresh token, jika gagal redirect ke login
-    const refreshed = await tryRefreshToken();
-    if (!refreshed) { window.location.href = '/login.html'; return; }
-    return apiRequest(method, endpoint, body); // retry
-  }
-
-  return res.json();
-}
-
-export const api = {
-  get:    (url)         => apiRequest('GET',    url),
-  post:   (url, body)   => apiRequest('POST',   url, body),
-  put:    (url, body)   => apiRequest('PUT',    url, body),
-  delete: (url)         => apiRequest('DELETE', url),
-};
 ```
 
 ### 17.3 Route Guards
 
-Setiap halaman wajib memeriksa token dan role di awal load:
+Proteksi rute menggunakan Laravel Middleware:
 
-```javascript
-// utils/auth-guard.js
-function requireAuth(allowedRoles = []) {
-  const token = localStorage.getItem('access_token');
-  const user  = JSON.parse(localStorage.getItem('user') || '{}');
-
-  if (!token) { window.location.href = '/login.html'; return false; }
-  if (allowedRoles.length && !allowedRoles.includes(user.role_slug)) {
-    window.location.href = '/403.html'; return false;
-  }
-  return true;
+```php
+// app/Http/Middleware/ApiAuthMiddleware.php
+public function handle($request, Closure $next) {
+    if (!Session::has('access_token')) {
+        return redirect('/login');
+    }
+    return $next($request);
 }
 ```
 
@@ -1163,57 +1132,9 @@ Password : (auto-generate, tampil sekali saat seeder berjalan)
 
 ## 19. API Documentation
 
-- Gunakan **Swagger UI** (OpenAPI 3.0) atau Redoc
-- File spec: `docs/api/openapi.yaml`
-- Swagger UI dapat diakses di: `http://localhost:8080/api-docs`
-- Setiap endpoint wajib terdokumentasi: method, path, request body, response schema, error codes
-
-### Contoh Minimal openapi.yaml
-
-```yaml
-openapi: 3.0.3
-info:
-  title: Employee Management API
-  version: 1.0.0
-  description: API untuk aplikasi pengelolaan data pegawai JMC Indonesia
-
-servers:
-  - url: http://localhost:8080/api
-
-components:
-  securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
-
-security:
-  - bearerAuth: []
-
-paths:
-  /auth/login:
-    post:
-      tags: [Auth]
-      summary: Login dan dapatkan JWT token
-      security: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [identifier, password, captcha]
-              properties:
-                identifier: { type: string }
-                password:   { type: string }
-                captcha:    { type: string }
-                remember_me:{ type: boolean }
-      responses:
-        '200':
-          description: Login berhasil
-        '401':
-          description: Kredensial tidak valid
-```
+- Dokumentasi API menggunakan **Postman Collection**.
+- File spec: `docs/api/postman_collection.json`.
+- Impor file tersebut ke Postman untuk melihat daftar endpoint, parameter, dan contoh response.
 
 ---
 

@@ -12,6 +12,11 @@ class JwtFilter implements FilterInterface
 {
     public function before(RequestInterface $request, $arguments = null)
     {
+        $path = $request->getUri()->getPath();
+        if (strpos($path, 'api/auth/login') !== false || strpos($path, 'api/auth/refresh') !== false) {
+            return $request;
+        }
+
         $authHeader = $request->getServer('HTTP_AUTHORIZATION');
         if (!$authHeader) {
             return Services::response()
@@ -29,10 +34,8 @@ class JwtFilter implements FilterInterface
                 ->setStatusCode(ResponseInterface::HTTP_UNAUTHORIZED);
         }
 
-        // Inject user data into $_REQUEST for global access via getVar('user')
         $_REQUEST['user'] = $decoded->user;
 
-        // Check force logout queue
         $flModel = new \App\Models\ForceLogoutModel();
         if ($flModel->find($decoded->user->id)) {
             return Services::response()
@@ -45,6 +48,5 @@ class JwtFilter implements FilterInterface
 
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
     {
-        // Do nothing
     }
 }
